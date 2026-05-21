@@ -310,10 +310,15 @@ export const forgotPassword = async (req, res) => {
       message: "If an account exists, a reset link has been sent",
     });
   } catch (error) {
-    console.log(error);
+    if (error.name === "ZodError") {
+      return res.status(400).json({
+        message: error.errors[0].message,
+      });
+    }
+    console.error("Forgot Password Error:", error);
 
     res.status(500).json({
-      message: "Internal Server Error",
+      message: error.message || "Internal Server Error",
     });
   }
 };

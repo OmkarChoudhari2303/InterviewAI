@@ -49,7 +49,7 @@ function Login() {
             Navigate("/dashboard");
         } catch (error) {
             console.log(error);
-            alert(error.response.data.message)
+            alert(error.response?.data?.message || error.message || "Login failed");
         }
     }
 
