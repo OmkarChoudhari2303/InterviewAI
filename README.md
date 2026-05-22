@@ -15,10 +15,11 @@
 
 ## 📖 Table of Contents
 1. [Key Features](#-key-features)
-2. [Project Architecture](#-project-architecture)
-3. [RAG Implementation Summary](#-rag-implementation-summary)
-4. [Detailed Documentation](#-detailed-documentation)
-5. [Setup & Installation Instructions](#-setup--installation-instructions)
+2. [User Guide & Website Walkthrough](#-user-guide--website-walkthrough)
+3. [Project Architecture](#-project-architecture)
+4. [RAG Implementation Summary](#-rag-implementation-summary)
+5. [Detailed Documentation](#-detailed-documentation)
+6. [Setup & Installation Instructions](#-setup--installation-instructions)
 
 ---
 
@@ -28,7 +29,14 @@
 - **Short & Long-Term Memory**: The system recalls details from the current conversation and synthesizes long-term memory summaries from prior sessions.
 - **Self-Healing Fallbacks**: If the vector database ever loses sync, the server automatically recovers and re-vectorizes your profile details directly from the relational database.
 - **Interactive Markdown Streaming**: Real-time response streaming from the model using Server-Sent Events (SSE), complete with syntax highlighting for code blocks.
-- **Flexible Authentication**: Sign up with local email-OTP verification or standard Google OAuth credentials.
+- **Flexible Authentication**: Sign up with local email-password verification or standard Google OAuth credentials.
+
+---
+
+## 📖 User Guide & Website Walkthrough
+
+For a step-by-step user guide detailing authentication pathways, database updates, RAG-powered hybrid interview simulations, and logout operations, check out:  
+👉 **[docs/user_guide.md](docs/user_guide.md)**
 
 ---
 
@@ -38,27 +46,28 @@ The system consists of a decoupled Client and Server:
 * **Client (`/client`)**: Built with React + Vite, styled using Tailwind CSS, and uses dynamic streaming interfaces to communicate with the backend.
 - **Server (`/server`)**: An Express.js application interacting with Neon PostgreSQL (via Prisma ORM) for core relations and Pinecone for semantic vector indices.
 
-For detailed sequence diagrams and database schemas, check out [docs/architecture.md](file:///d:/Cloud%20vandana%20Ass%202/InterviewAI/docs/architecture.md).
+For detailed sequence diagrams and database schemas, check out [docs/architecture.md](docs/architecture.md).
 
 ---
 
 ## 🧠 RAG Implementation Summary
 
-1. **Semantic Chunking**: [buildUserChunks.js](file:///d:/Cloud%20vandana%20Ass%202/InterviewAI/server/src/vector/buildUserChunks.js) divides developer profiles into standard segments (`profile`, `skills`, `projects`, `education`, `experience`).
+1. **Semantic Chunking**: [buildUserChunks.js](server/src/vector/buildUserChunks.js) divides developer profiles into standard segments (`profile`, `skills`, `projects`, `education`, `experience`).
 2. **Vector Space**: Embeddings are generated using the `gemini-embedding-001` model (768 dimensions) and stored in Pinecone database filters.
 3. **Retrieval, Ranking & Compression**: Relevant nodes are retrieved using cosine similarity, deduplicated, sorted by matching scores, and compressed to the top 6 entries before prompt generation.
 4. **Memory Summaries**: Finished conversations are summarized, scored for career relevance, and saved to PostgreSQL and Pinecone.
 
-For details on the vector math, memory compression, and self-healing systems, see [docs/rag_implementation.md](file:///d:/Cloud%20vandana%20Ass%202/InterviewAI/docs/rag_implementation.md).
+For details on the vector math, memory compression, and self-healing systems, see [docs/rag_implementation.md](docs/rag_implementation.md).
 
 ---
 
 ## 📁 Detailed Documentation
 
 For ease of review, the project documentation is organized under the `docs/` folder:
-- **System Architecture**: Detailed sequence diagrams and topology explanation. [View here](file:///d:/Cloud%20vandana%20Ass%202/InterviewAI/docs/architecture.md)
-- **RAG Implementation**: Technical deep-dive into semantic chunking, embeddings, post-retrieval ranking, memory tiers, and self-healing. [View here](file:///d:/Cloud%20vandana%20Ass%202/InterviewAI/docs/rag_implementation.md)
-- **APIs & Tools**: Comprehensive API routing table, parameters, and active libraries directory. [View here](file:///d:/Cloud%20vandana%20Ass%202/InterviewAI/docs/apis_and_tools.md)
+- **User Guide**: Step-by-step instructions on accessing, login, database customization, and chat. [View here](docs/user_guide.md)
+- **System Architecture**: Detailed sequence diagrams and topology explanation. [View here](docs/architecture.md)
+- **RAG Implementation**: Technical deep-dive into semantic chunking, embeddings, post-retrieval ranking, memory tiers, and self-healing. [View here](docs/rag_implementation.md)
+- **APIs & Tools**: Comprehensive API routing table, parameters, and active libraries directory. [View here](docs/apis_and_tools.md)
 
 ---
 

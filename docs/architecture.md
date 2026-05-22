@@ -27,7 +27,7 @@ graph TD
 
 ## 2. Database Schema (Relational PostgreSQL)
 
-Below is the entity-relationship mapping of the PostgreSQL database managed by [Prisma ORM](file:///d:/Cloud%20vandana%20Ass%202/InterviewAI/server/prisma/schema.prisma):
+Below is the entity-relationship mapping of the PostgreSQL database managed by [Prisma ORM](../server/prisma/schema.prisma):
 
 ```
 +------------------+         +------------------+

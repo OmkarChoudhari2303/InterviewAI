@@ -6,7 +6,7 @@
 
 ## 1. Data Chunking Strategy (`buildUserChunks.js`)
 
-To enable high-quality semantic retrieval, user profiles are segmented into isolated, contextual chunks using [buildUserChunks.js](file:///d:/Cloud%20vandana%20Ass%202/InterviewAI/server/src/vector/buildUserChunks.js). Segmenting the data ensures that the embedding models generate clean vectors focusing on specific professional aspects.
+To enable high-quality semantic retrieval, user profiles are segmented into isolated, contextual chunks using [buildUserChunks.js](../server/src/vector/buildUserChunks.js). Segmenting the data ensures that the embedding models generate clean vectors focusing on specific professional aspects.
 
 The profile is parsed into five chunk types:
 - **`profile`**: Serialized JSON string containing name, bio, and social urls.
@@ -19,7 +19,7 @@ The profile is parsed into five chunk types:
 
 ## 2. Generating Embeddings (`embeddingService.js`)
 
-Embeddings are generated in [embeddingService.js](file:///d:/Cloud%20vandana%20Ass%202/InterviewAI/server/src/ai/embeddingService.js) using the Google GenAI SDK:
+Embeddings are generated in [embeddingService.js](../server/src/ai/embeddingService.js) using the Google GenAI SDK:
 - **Model**: `gemini-embedding-001`
 - **Output Dimensionality**: 768 dimensions
 
@@ -38,7 +38,7 @@ return response.embeddings[0].values;
 
 ## 3. Vector Database Management (Pinecone)
 
-Vector indices and queries are managed in [pinecone.js](file:///d:/Cloud%20vandana%20Ass%202/InterviewAI/server/src/vector/pinecone.js), with database writes and queries executed as follows:
+Vector indices and queries are managed in [pinecone.js](../server/src/vector/pinecone.js), with database writes and queries executed as follows:
 
 ### A. Synchronization (`syncUserVectors.js`)
 When a user updates their profile:
@@ -59,7 +59,7 @@ Two distinct semantic searches are performed for every query:
 
 ## 4. Post-Retrieval Pipeline (Deduplication, Ranking & Compression)
 
-Once vector search returns raw matches from Pinecone, the results are refined through a multi-stage memory pipeline in [ragService.js](file:///d:/Cloud%20vandana%20Ass%202/InterviewAI/server/src/ai/ragService.js):
+Once vector search returns raw matches from Pinecone, the results are refined through a multi-stage memory pipeline in [ragService.js](../server/src/ai/ragService.js):
 
 ```mermaid
 graph LR
@@ -69,10 +69,10 @@ graph LR
     Compress --> RAGPrompt[RAG Prompt builder]
 ```
 
-1. **Deduplication** ([deduplicateMemory.js](file:///d:/Cloud%20vandana%20Ass%202/InterviewAI/server/src/ai/deduplicateMemory.js)): Trims, lowercases, and filters out identical textual chunks to prevent token wastage.
-2. **Ranking** ([rankMemory.js](file:///d:/Cloud%20vandana%20Ass%202/InterviewAI/server/src/ai/rankMemory.js)): Sorts chunks by their Pinecone similarity match scores descending:
+1. **Deduplication** ([deduplicateMemory.js](../server/src/ai/deduplicateMemory.js)): Trims, lowercases, and filters out identical textual chunks to prevent token wastage.
+2. **Ranking** ([rankMemory.js](../server/src/ai/rankMemory.js)): Sorts chunks by their Pinecone similarity match scores descending:
    $$\text{score} = \cos(\theta) = \frac{\mathbf{A} \cdot \mathbf{B}}{\|\mathbf{A}\| \|\mathbf{B}\|}$$
-3. **Compression** ([compressMemory.js](file:///d:/Cloud%20vandana%20Ass%202/InterviewAI/server/src/ai/compressMemory.js)): Extracts the top 6 most relevant items. This prevents prompt pollution and respects context constraints.
+3. **Compression** ([compressMemory.js](../server/src/ai/compressMemory.js)): Extracts the top 6 most relevant items. This prevents prompt pollution and respects context constraints.
 
 ---
 
@@ -81,19 +81,19 @@ graph LR
 To simulate a real human interviewer, the system maintains two tiers of conversation memory:
 
 ### A. Short-Term Memory
-Saved immediately in Pinecone via [storeConversationMemory.js](file:///d:/Cloud%20vandana%20Ass%202/InterviewAI/server/src/vector/storeConverstaionMemory.js) for every prompt-response exchange.
+Saved immediately in Pinecone via [storeConversationMemory.js](../server/src/vector/storeConverstaionMemory.js) for every prompt-response exchange.
 
 ### B. Long-Term Memory Pipeline
-After conversations conclude, an background routine synthesizes long-term memory via [storeLongTermMemory.js](file:///d:/Cloud%20vandana%20Ass%202/InterviewAI/server/src/ai/storeLongTermMemory.js):
-1. **Summarization** ([summarizeConversationMemory.js](file:///d:/Cloud%20vandana%20Ass%202/InterviewAI/server/src/ai/summarizeConversationMemory.js)): Gemini synthesizes a concise summary of the candidate's goals, skills, interests, and mock interview performance.
-2. **Importance Scoring** ([scoreMemoryImportance.js](file:///d:/Cloud%20vandana%20Ass%202/InterviewAI/server/src/ai/scoreMemoryImportance.js)): The summary is analyzed for key terms (`career`, `goal`, `interview`, `experience`, etc.) and assigned an importance score between `0.3` and `1.0`.
+After conversations conclude, an background routine synthesizes long-term memory via [storeLongTermMemory.js](../server/src/ai/storeLongTermMemory.js):
+1. **Summarization** ([summarizeConversationMemory.js](../server/src/ai/summarizeConversationMemory.js)): Gemini synthesizes a concise summary of the candidate's goals, skills, interests, and mock interview performance.
+2. **Importance Scoring** ([scoreMemoryImportance.js](../server/src/ai/scoreMemoryImportance.js)): The summary is analyzed for key terms (`career`, `goal`, `interview`, `experience`, etc.) and assigned an importance score between `0.3` and `1.0`.
 3. **Storage**: The summary is saved in PostgreSQL as a `MemorySummary` record, embedded using `gemini-embedding-001`, and upserted to Pinecone under metadata tag `memoryType: long_term_memory`.
 
 ---
 
 ## 6. Self-Healing Fallback Logic
 
-To guarantee structural resilience and prevent empty prompts in cases of vector deletion or platform migration, the server features a self-healing engine inside [generateRAGStream.js](file:///d:/Cloud%20vandana%20Ass%202/InterviewAI/server/src/ai/generateRAGStream.js):
+To guarantee structural resilience and prevent empty prompts in cases of vector deletion or platform migration, the server features a self-healing engine inside [generateRAGStream.js](../server/src/ai/generateRAGStream.js):
 
 - On chat initiation, the server queries Pinecone for the user's vector count.
 - If the vector count is `0`, but the user has registered profile information in the PostgreSQL database, the server automatically triggers:
