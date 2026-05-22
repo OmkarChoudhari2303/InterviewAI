@@ -69,7 +69,7 @@ All the routes below automatically trigger Pinecone Vector DB synchronization to
 
 ### Backend Infrastructure
 - **Express.js**: Node.js web application framework handling server middleware, request routers, and error boundaries.
-- **Nodemailer**: Node.js SMTP email dispatcher module used for transactional account emails (OTP and password resets).
+- **Nodemailer**: Node.js SMTP email dispatcher module used for transactional account emails (OTP and password resets). (I have used my personal email to send the reset password links, no external email services are used)
 - **Bcrypt.js**: Cryptographic library used to hash, salt, and verify candidate passwords.
 - **JSONWebToken (`jsonwebtoken`)**: Signed payload standard used for stateless session management (Access/Refresh credentials).
 - **Zod**: Type-safe schema validation library enforcing input integrity on incoming requests (schemas for signup, login, password updates).
