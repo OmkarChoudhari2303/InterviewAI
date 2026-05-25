@@ -69,7 +69,7 @@ function Signup(){
                 disabled={loading}
                 className="w-full bg-white text-black p-3 rounded-lg font-semibold hover:bg-zinc-200 transition disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                    {loading ? (
+                    {loading ? ( // logic is like, if request is sent , then it goes to loading state, and shows button as Signing.. else Signup.
                         <>
                             <svg className="animate-spin h-5 w-5 text-black" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />

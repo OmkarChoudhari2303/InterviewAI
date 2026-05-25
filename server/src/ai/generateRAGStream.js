@@ -27,6 +27,8 @@ export const generateRAGStream = async ({ userId, prompt }) => {
             }
         });
 
+
+        //Early database checks: if data is not available in DB then then AI immedietly replie: "No data abailable."
         const hasProfileData = user && user.profile && (
             (user.profile.name && user.profile.name.trim() !== "") ||
             (user.profile.bio && user.profile.bio.trim() !== "") ||
@@ -61,7 +63,7 @@ export const generateRAGStream = async ({ userId, prompt }) => {
                 }
             });
             const hasVectors = checkVectors.matches && checkVectors.matches.length > 0;
-            
+
             if (!hasVectors) {
                 console.log(`[Self-Healing] User ${userId} has no profile vectors in Pinecone. Syncing vectors to Pinecone...`);
                 await syncUserVectors(userId);
