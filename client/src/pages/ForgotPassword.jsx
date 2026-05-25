@@ -6,11 +6,14 @@ function ForgotPassword(){
     const [email,setEmail] = useState("");
 
     const [message, setMessage] = useState("");
+    const [resetLink, setResetLink] = useState("");
 
     const [loading,setLoading] = useState(false);
 
     const handleSubmit = async (e)=>{
         e.preventDefault();
+        setMessage("");
+        setResetLink("");
 
         try{
             setLoading(true);
@@ -18,6 +21,9 @@ function ForgotPassword(){
             const response = await axiosInstance.post("/auth/forgot-password",{email})
 
             setMessage(response.data.message);
+            if (response.data.resetLink) {
+                setResetLink(response.data.resetLink);
+            }
         }catch(error){
             console.log(error);
 
@@ -90,6 +96,27 @@ function ForgotPassword(){
                         <p className="text-sm text-center text-zinc-300">
                             {message}
                         </p>
+                    )
+                }
+
+                {
+                    resetLink && (
+                        <div className="mt-4 p-4 rounded-xl bg-zinc-950/80 border border-zinc-800 text-left">
+                            <p className="text-xs text-yellow-500 font-bold mb-1 flex items-center gap-1.5">
+                                ⚠️ Mail Delivery Restricted
+                            </p>
+                            <p className="text-xs text-zinc-400 mb-3 leading-relaxed">
+                                Because cloud providers (like Render) block SMTP ports by default, copy and use this direct reset link to complete the reset flow:
+                            </p>
+                            <a
+                                href={resetLink}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-xs text-blue-400 hover:underline break-all block p-2 rounded bg-zinc-900 border border-zinc-800 font-mono"
+                            >
+                                {resetLink}
+                            </a>
+                        </div>
                     )
                 }
             </form>

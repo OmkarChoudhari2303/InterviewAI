@@ -294,21 +294,29 @@ export const forgotPassword = async (req, res) => {
 
     const resetLink = `${process.env.CLIENT_URL}/reset-password/${encodeURIComponent(resetToken)}`;
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
 
-      to: user.email,
+        to: user.email,
 
-      subject: "Password Reset",
+        subject: "Password Reset",
 
-      html: `<h2>Password Reset</h2>
-              <p>Click Below to Reset Password </p>
-              <a href="${resetLink}"> Reset Password</a>`,
-    });
+        html: `<h2>Password Reset</h2>
+                <p>Click Below to Reset Password </p>
+                <a href="${resetLink}"> Reset Password</a>`,
+      });
 
-    res.status(200).json({
-      message: "If an account exists, a reset link has been sent",
-    });
+      res.status(200).json({
+        message: "If an account exists, a reset link has been sent",
+      });
+    } catch (mailError) {
+      console.error("Mail sending failed:", mailError);
+      res.status(200).json({
+        message: "If an account exists, a reset link has been generated",
+        resetLink,
+      });
+    }
   } catch (error) {
     if (error.name === "ZodError") {
       return res.status(400).json({
