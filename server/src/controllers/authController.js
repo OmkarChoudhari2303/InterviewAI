@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import {OAuth2Client} from "google-auth-library";
+import { OAuth2Client } from "google-auth-library";
 
 import {
   signupSchema,
@@ -179,7 +179,7 @@ export const refreshAccessToken = async (req, res) => {
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
     await prisma.refreshToken.deleteMany({
-      where:{
+      where: {
         token: hashToken(refreshToken)
       }
     })
@@ -190,7 +190,7 @@ export const refreshAccessToken = async (req, res) => {
     const newRefreshToken = generateRefreshToken(decoded.id)
 
     await prisma.refreshToken.create({
-      data:{
+      data: {
         token: hashToken(newRefreshToken),
 
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), //7days
@@ -312,9 +312,8 @@ export const forgotPassword = async (req, res) => {
       });
     } catch (mailError) {
       console.error("Mail sending failed:", mailError);
-      res.status(200).json({
-        message: "If an account exists, a reset link has been generated",
-        resetLink,
+      res.status(500).json({
+        message: "Failed to send password reset email. Please try again later.",
       });
     }
   } catch (error) {
@@ -390,11 +389,11 @@ const client = new OAuth2Client(
   process.env.GOOGLE_CLIENT_ID
 )
 
-export const googleLogin = async (req,res) =>{
-  try{
-    const {credential} = req.body
+export const googleLogin = async (req, res) => {
+  try {
+    const { credential } = req.body
 
-    if(!credential){
+    if (!credential) {
       return res.status(400).json({
         message: "Credetial Missing"
       })
@@ -407,41 +406,41 @@ export const googleLogin = async (req,res) =>{
 
     const payload = ticket.getPayload()
 
-    const{
+    const {
       sub,
       email,
       name,
       email_verified
     } = payload
 
-    if(!email_verified){
+    if (!email_verified) {
       return res.status(400).json({
         message: "Google email not verified"
       })
     }
 
     let user = await prisma.user.findUnique({
-      where: {email}
+      where: { email }
     })
 
     // creating users if doesnt exists
-    if(user){
+    if (user) {
       //users which logged in using email,pass and now tries to login with google
-      if(!user.googleId){
+      if (!user.googleId) {
         user = await prisma.user.update({
-          where:{
+          where: {
             id: user.id
           },
-          data:{
+          data: {
             googleId: sub
           }
         })
       }
-    }else{
+    } else {
       //create new google user
       user = await prisma.user.create({
-        data:{
-          name, 
+        data: {
+          name,
           email,
           googleId: sub
         }
@@ -453,7 +452,7 @@ export const googleLogin = async (req,res) =>{
     const refreshToken = generateRefreshToken(user.id);
 
     await prisma.refreshToken.create({
-      data:{
+      data: {
         token: hashToken(refreshToken),
 
         expiresAt: new Date(
@@ -485,7 +484,7 @@ export const googleLogin = async (req,res) =>{
 
       user: getSafeUser(user)
     })
-  }catch(error){
+  } catch (error) {
     console.log(error)
 
     res.status(500).json({
