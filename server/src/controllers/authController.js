@@ -1,3 +1,4 @@
+import dns from "dns";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
@@ -21,6 +22,8 @@ import prisma from "../lib/prisma.js";
 import transporter from "../utils/sendMail.js";
 import { hash } from "crypto";
 import { any } from "zod";
+
+dns.setDefaultResultOrder("ipv4first");
 
 export const signup = async (req, res) => {
   try {
