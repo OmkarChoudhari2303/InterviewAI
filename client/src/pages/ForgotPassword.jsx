@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import { Link } from "react-router-dom";
 import axiosInstance from "../api/axios.js";
 
 function ForgotPassword(){
@@ -71,14 +71,7 @@ function ForgotPassword(){
 
                 <button
                 disabled={loading}
-                className="
-                w-full
-                bg-white
-                text-black
-                p-3
-                rounded-2xl
-                font-semibold
-                "
+                className="w-full bg-white text-black p-3 rounded-lg font-semibold hover:bg-zinc-200 transition disabled:opacity-50"
                 >
                     {
                         loading
@@ -86,10 +79,15 @@ function ForgotPassword(){
                         : "Send Reset Link"
                     }
                 </button>
+                <p className="text-sm text-center text-zinc-400 mt-4">
+                    <Link to="/login" className="text-blue-400 hover:underline">
+                        Back to Login
+                    </Link>
+                </p>
 
                 {
                     message && (
-                        <p className="text-sm">
+                        <p className="text-sm text-center text-zinc-300">
                             {message}
                         </p>
                     )

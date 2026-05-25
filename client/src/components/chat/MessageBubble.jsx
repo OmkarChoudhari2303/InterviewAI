@@ -9,15 +9,12 @@ function MessageBubble({message}){
         px-5
         py-3
         rounded-3xl
-        bg-white
-        text-black
         text-[15px]
         leading-7
         shadow-lg
-        whitespace-pre-wrap
 
         ${
-            isUser? `bg-white text-black max-w-fit ml-auto text-left` : `bg-zinc-900 text-white text-left max-w-fit`
+            isUser ? "bg-white text-black ml-auto text-left max-w-fit" : "bg-zinc-900 text-white text-left max-w-fit"
         }
         `}
         >

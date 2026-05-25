@@ -8,7 +8,9 @@ function InputField({
     name,
     placeholder,
     value,
-    onChange
+    onChange,
+    disabled = false,
+    ...props
 }){
     return(
         <input 
@@ -17,6 +19,7 @@ function InputField({
         placeholder={placeholder}
         value = {value}
         onChange={onChange}
+        disabled={disabled}
         className="
         w-full
         p-3
@@ -25,7 +28,9 @@ function InputField({
         border
         border-zinc-700
         outline-none
+        disabled:opacity-50
         "
+        {...props}
         />
     )
 }

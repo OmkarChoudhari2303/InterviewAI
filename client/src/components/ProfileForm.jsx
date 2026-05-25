@@ -11,6 +11,7 @@ function ProfileForm(){
         githubUrl:"",
         linkedinUrl:""
     })
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -44,8 +45,10 @@ function ProfileForm(){
 
     const handleSubmit = async (e)=>{
         e.preventDefault()
+        if (loading) return;
 
         try{
+            setLoading(true);
             const token = localStorage.getItem("token");
 
             await axiosInstance.post("/profile/create",formData,{
@@ -58,6 +61,8 @@ function ProfileForm(){
             console.log(error);
 
             alert(error.response?.data?.message || "Something went wrong")
+        }finally{
+            setLoading(false);
         }
     }
 
@@ -72,6 +77,7 @@ function ProfileForm(){
             placeholder="Full Name"
             value={formData.name}
             onChange={handleChange}
+            disabled={loading}
             />
 
             <textarea 
@@ -79,6 +85,7 @@ function ProfileForm(){
             placeholder="Write about yourself" 
             value={formData.bio}
             onChange={handleChange}
+            disabled={loading}
             className="
             w-full
             h-32
@@ -87,6 +94,8 @@ function ProfileForm(){
             bg-black
             border
             border-zinc-700
+            outline-none
+            disabled:opacity-50
             "/>
 
             <InputField
@@ -94,6 +103,7 @@ function ProfileForm(){
             placeholder="GitHub URL"
             value={formData.githubUrl}
             onChange={handleChange}
+            disabled={loading}
             />
 
             <InputField
@@ -101,9 +111,11 @@ function ProfileForm(){
             placeholder="LinkedIn URL"
             value={formData.linkedinUrl}
             onChange={handleChange}
+            disabled={loading}
             />
             
             <button
+            disabled={loading}
             className="
             bg-white
             text-black
@@ -111,9 +123,21 @@ function ProfileForm(){
             py-3
             rounded-lg
             font-semibold
+            disabled:opacity-50
+            flex
+            items-center
+            gap-2
             "
             >
-                Save Profile
+                {loading ? (
+                    <>
+                        <svg className="animate-spin h-5 w-5 text-black" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        Saving...
+                    </>
+                ) : "Save Profile"}
             </button>
         </form>
     )

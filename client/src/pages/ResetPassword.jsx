@@ -73,27 +73,12 @@ function ResetPassword(){
                 placeholder="Enter new password"
                 value={password}
                 onChange={(e)=>setPassword(e.target.value)}
-
-                className="
-                w-full
-                p-3
-                rounded-2xl
-                bg-black
-                border
-                border-zinc-700
-                "
+                className="w-full p-3 rounded-lg bg-black border border-zinc-700 focus:border-zinc-500 outline-none transition"
                 />
 
                 <button
                 disabled={loading}
-                className="
-                w-full
-                bg-white
-                text-black
-                p-3
-                rounded
-                font-semibold
-                "
+                className="w-full bg-white text-black p-3 rounded-lg font-semibold hover:bg-zinc-200 transition disabled:opacity-50"
                 >
                     {
                         loading

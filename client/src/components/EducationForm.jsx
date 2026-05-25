@@ -13,6 +13,7 @@ function EducationForm(){
         endYear:""
     })
     const [educationList, setEducationList] = useState([])
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const fetchEducation = async () => {
@@ -39,8 +40,10 @@ function EducationForm(){
 
     const handleSubmit = async (e)=>{
         e.preventDefault();
+        if (loading) return;
 
         try{
+            setLoading(true);
             const token = localStorage.getItem("token");
 
             const response = await axiosInstance.post(
@@ -63,11 +66,15 @@ function EducationForm(){
             })
         }catch(error){
             console.log(error);
+        }finally{
+            setLoading(false);
         }
     }
 
     const handleDelete = async (id) => {
+        if (loading) return;
         try {
+            setLoading(true);
             const token = localStorage.getItem("token");
             await axiosInstance.delete(`/education/${id}`, {
                 headers: {
@@ -78,6 +85,8 @@ function EducationForm(){
         } catch (error) {
             console.log("Error deleting education record:", error);
             alert("Failed to delete education record");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -96,6 +105,7 @@ function EducationForm(){
                 placeholder="College Name"
                 value={formData.collegeName}
                 onChange={handleChange}
+                disabled={loading}
                 />
 
                 <InputField
@@ -103,6 +113,7 @@ function EducationForm(){
                 placeholder="Degree"
                 value={formData.degree}
                 onChange={handleChange}
+                disabled={loading}
                 />
 
                 <InputField
@@ -110,6 +121,7 @@ function EducationForm(){
                 placeholder="Field Of Study"
                 value={formData.fieldOfStudy}
                 onChange={handleChange}
+                disabled={loading}
                 />
 
                 <InputField
@@ -117,6 +129,7 @@ function EducationForm(){
                 placeholder="Start Year"
                 value={formData.startYear}
                 onChange={handleChange}
+                disabled={loading}
                 />
 
                 <InputField
@@ -124,9 +137,11 @@ function EducationForm(){
                 placeholder="End Year"
                 value={formData.endYear}
                 onChange={handleChange}
+                disabled={loading}
                 />
 
                 <button
+                disabled={loading}
                 className="
                 bg-white
                 text-black
@@ -137,9 +152,21 @@ function EducationForm(){
                 cursor-pointer
                 hover:bg-zinc-200
                 transition
+                disabled:opacity-50
+                flex
+                items-center
+                gap-2
                 "
                 >
-                    Add Education
+                    {loading ? (
+                        <>
+                            <svg className="animate-spin h-5 w-5 text-black" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                            </svg>
+                            Adding...
+                        </>
+                    ) : "Add Education"}
                 </button>
             </form>
 
@@ -157,7 +184,8 @@ function EducationForm(){
                                 <button
                                     type="button"
                                     onClick={() => handleDelete(edu.id)}
-                                    className="text-red-400 hover:text-red-300 text-sm font-medium bg-red-950/40 px-2 py-1 rounded transition cursor-pointer"
+                                    disabled={loading}
+                                    className="text-red-400 hover:text-red-300 text-sm font-medium bg-red-950/40 px-2 py-1 rounded transition cursor-pointer disabled:opacity-50"
                                 >
                                     Delete
                                 </button>

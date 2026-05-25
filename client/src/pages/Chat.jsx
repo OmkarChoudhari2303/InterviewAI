@@ -9,6 +9,8 @@ function Chat() {
   const [conversationId, setConversationId] = useState(null);
   const [conversations, setConversations] = useState([]);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
 
   const messageEndRef = useRef(null);
 
@@ -189,7 +191,9 @@ function Chat() {
   };
 
   const deleteConversation = async (id) => {
+    if (deletingId) return;
     try {
+      setDeletingId(id);
       const token = localStorage.getItem("token");
       await axiosInstance.delete(`/chat/conversations/${id}`, {
         headers: {
@@ -201,9 +205,11 @@ function Chat() {
         setMessages([]);
         setConversationId(null);
       }
-      fetchConversations();
+      await fetchConversations();
     } catch (error) {
       console.log(error);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -213,15 +219,39 @@ function Chat() {
   };
 
   return (
-    <div className="h-screen bg-black text-white flex overflow-hidden">
+    <div className="h-screen bg-black text-white flex overflow-hidden relative">
+      {/* Sidebar Backdrop (Mobile only) */}
+      {sidebarOpen && (
+        <div 
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 bg-black/60 z-30 md:hidden"
+        />
+      )}
+
       {/* Sidebar Container */}
-      <div className="w-[320px] border-r border-zinc-800 flex flex-col bg-zinc-950">
-        <div className="p-0 border-b border-zinc-800">
-          <h1 className="text-8xl font-bold tracking-tight">InterviewAI Chat</h1>
+      <div className={`
+        fixed md:static inset-y-0 left-0 z-40
+        w-[320px] border-r border-zinc-800 flex flex-col bg-zinc-950
+        transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0
+        transition-transform duration-300 ease-in-out
+      `}>
+        <div className="p-4 border-b border-zinc-800 flex items-center justify-between">
+          <h1 className="text-xl font-bold tracking-tight text-white">InterviewAI Chat</h1>
+          <button 
+            onClick={() => setSidebarOpen(false)}
+            className="md:hidden text-zinc-400 hover:text-white"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
         <div className="p-4">
           <button
-            onClick={resetChat}
+            onClick={() => {
+              resetChat();
+              setSidebarOpen(false);
+            }}
             className="w-full bg-white text-black p-3 rounded-lg font-semibold hover:bg-zinc-200 transition cursor-pointer"
           >
             + New Chat
@@ -246,24 +276,51 @@ function Chat() {
                 }
               </p>
               <button
-                onClick={() => loadConversation(conversation.id)}
+                onClick={() => {
+                  loadConversation(conversation.id);
+                  setSidebarOpen(false);
+                }}
                 className="flex-1 text-left truncate text-sm text-white"
               >
                 {conversation.title || "New Chat"}
               </button>
-              <button
-                onClick={() => deleteConversation(conversation.id)}
-                className="text-red-400 hover:text-red-300 text-xs px-2 py-1 rounded transition cursor-pointer"
-              >
-                Delete
-              </button>
+              {deletingId === conversation.id ? (
+                <div className="flex items-center justify-center px-2 py-1">
+                  <svg className="animate-spin h-4 w-4 text-red-500" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                </div>
+              ) : (
+                <button
+                  onClick={() => deleteConversation(conversation.id)}
+                  disabled={deletingId !== null}
+                  className="text-red-400 hover:text-red-300 text-xs px-2 py-1 rounded transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Delete
+                </button>
+              )}
             </div>
           ))}
         </div>
       </div>
 
       {/* Main Chat Display Window */}
-      <div className="flex-1 flex flex-col h-full bg-black">
+      <div className="flex-1 flex flex-col h-full bg-black overflow-hidden">
+        {/* Mobile Header */}
+        <div className="md:hidden flex items-center justify-between p-4 border-b border-zinc-800 bg-zinc-950">
+          <button 
+            onClick={() => setSidebarOpen(true)}
+            className="text-zinc-400 hover:text-white focus:outline-none"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <span className="font-bold text-sm text-white">InterviewAI Chat</span>
+          <div className="w-6"></div>
+        </div>
+
         {/* Messages Body */}
         {
           messages.length === 0 && (
@@ -278,7 +335,7 @@ function Chat() {
             </div>
           )
         }
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
           {messages.map((message, index) => (
             <MessageBubble key={index} message={message} />
           ))}
@@ -305,7 +362,7 @@ function Chat() {
         {/* Fixed Form Workspace Input Alignment */}
         <form
           onSubmit={sendMessage}
-          className="p-4 border-t border-zinc-800 bg-black flex gap-4"
+          className="p-4 border-t border-zinc-800 bg-black flex gap-3 md:gap-4"
         >
           <input
             type="text"
@@ -317,7 +374,7 @@ function Chat() {
           <button
             type="submit"
             disabled={loading || !prompt.trim()}
-            className="bg-white text-black px-6 rounded-lg font-semibold text-sm hover:bg-zinc-200 transition disabled:opacity-50"
+            className="bg-white text-black px-4 md:px-6 rounded-lg font-semibold text-sm hover:bg-zinc-200 transition disabled:opacity-50"
           >
             Send
           </button>
