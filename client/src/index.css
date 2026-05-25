@@ -173,3 +173,15 @@ code {
   animation-delay: 0.5s;
 }
 
+/* Ensure native calendar icons are visible on dark inputs */
+.bg-zinc-900 input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.6;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.bg-zinc-900 input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 0.9;
+}
+

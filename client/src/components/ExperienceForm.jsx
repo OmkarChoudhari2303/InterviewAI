@@ -4,6 +4,32 @@ import axiosInstance from "../api/axios.js";
 
 import InputField from "./InputField.jsx";
 
+const CalendarIcon = ({ disabled }) => (
+    <svg 
+    className={`w-5 h-5 transition-colors ${disabled ? "text-zinc-600 opacity-40" : "text-zinc-400"}`} 
+    fill="none" 
+    viewBox="0 0 24 24" 
+    stroke="currentColor" 
+    strokeWidth="2"
+    >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+);
+
+const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    try {
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return dateStr;
+        return date.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short"
+        });
+    } catch (e) {
+        return dateStr;
+    }
+};
+
 function ExperienceForm(){
     const [formData,setFormData] = useState({
         companyName:"",
@@ -36,12 +62,16 @@ function ExperienceForm(){
     const handleChange = (e)=>{
         const {name, value, type, checked} = e.target
 
-        setFormData({
-            ...formData,
-            [name]: type === "checkbox"
-            ? checked
-            : value
-        })
+        setFormData((prev) => {
+            const nextData = {
+                ...prev,
+                [name]: type === "checkbox" ? checked : value
+            };
+            if (name === "currentlyWorking" && checked) {
+                nextData.endDate = "";
+            }
+            return nextData;
+        });
     }
 
     const handleSubmit = async (e)=>{
@@ -142,21 +172,44 @@ function ExperienceForm(){
                 "
                 />
 
-                <InputField
-                name="startDate"
-                placeholder="Start Date"
-                value={formData.startDate}
-                onChange={handleChange}
-                disabled={loading}
-                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-medium text-zinc-400">
+                            Start Date
+                        </label>
+                        <InputField
+                        type="date"
+                        name="startDate"
+                        value={formData.startDate}
+                        onChange={handleChange}
+                        disabled={loading}
+                        icon={<CalendarIcon disabled={loading} />}
+                        onClick={(e) => {
+                            try { e.target.showPicker(); } catch (err) {}
+                        }}
+                        />
+                    </div>
 
-                <InputField
-                name="endDate"
-                placeholder="End Date"
-                value={formData.endDate}
-                onChange={handleChange}
-                disabled={loading}
-                />
+                    <div className="flex flex-col gap-1.5">
+                        <label className={`text-sm font-medium transition-colors ${formData.currentlyWorking ? "text-zinc-650 opacity-40" : "text-zinc-400"}`}>
+                            End Date
+                        </label>
+                        <InputField
+                        type="date"
+                        name="endDate"
+                        value={formData.endDate}
+                        onChange={handleChange}
+                        disabled={loading || formData.currentlyWorking}
+                        icon={<CalendarIcon disabled={loading || formData.currentlyWorking} />}
+                        onClick={(e) => {
+                            if (!formData.currentlyWorking) {
+                                try { e.target.showPicker(); } catch (err) {}
+                            }
+                        }}
+                        className={formData.currentlyWorking ? "opacity-30 cursor-not-allowed bg-zinc-950 border-zinc-800" : ""}
+                        />
+                    </div>
+                </div>
 
                 <label className="flex gap-2 items-center">
                     <input 
@@ -210,7 +263,7 @@ function ExperienceForm(){
                                     <p className="text-sm text-zinc-450">{exp.role}</p>
                                     {exp.description && <p className="text-xs text-zinc-400 mt-1 whitespace-pre-wrap">{exp.description}</p>}
                                     <p className="text-xs text-zinc-500">
-                                        {exp.startDate} - {exp.currentlyWorking ? "Present" : exp.endDate}
+                                        {formatDate(exp.startDate)} - {exp.currentlyWorking ? "Present" : formatDate(exp.endDate)}
                                     </p>
                                 </div>
                                 <button

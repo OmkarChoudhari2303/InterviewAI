@@ -10,9 +10,11 @@ function InputField({
     value,
     onChange,
     disabled = false,
+    className = "",
+    icon,
     ...props
 }){
-    return(
+    const inputEl = (
         <input 
         type={type}
         name={name}
@@ -20,7 +22,7 @@ function InputField({
         value = {value}
         onChange={onChange}
         disabled={disabled}
-        className="
+        className={`
         w-full
         p-3
         rounded-lg
@@ -29,10 +31,25 @@ function InputField({
         border-zinc-700
         outline-none
         disabled:opacity-50
-        "
+        ${icon ? "pl-10" : ""}
+        ${className}
+        `}
         {...props}
         />
     )
+
+    if (icon) {
+        return (
+            <div className="relative w-full">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    {icon}
+                </div>
+                {inputEl}
+            </div>
+        )
+    }
+
+    return inputEl;
 }
 
 export default InputField;
